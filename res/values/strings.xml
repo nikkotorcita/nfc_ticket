@@ -8,5 +8,7 @@
     <string name="remaining_balance">Remaining Balance</string>
     <string name="null_string">-</string>
     <string name="passenger_id">Passenger:</string>
+    <string name="uid">UID</string>
+    <string name="token">Token</string>
 
 </resources>

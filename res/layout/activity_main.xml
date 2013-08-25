@@ -18,16 +18,6 @@
         android:text="@string/bill_passenger" />
 
     <TextView
-        android:id="@+id/textView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/bill_passenger"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="84dp"
-        android:text="@string/remaining_balance"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    <TextView
         android:id="@+id/passenger_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -47,20 +37,10 @@
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
-        android:id="@+id/balance_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/bill_passenger"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="30dp"
-        android:text="@string/null_string"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/balance_value"
+        android:layout_above="@+id/bill_passenger"
         android:layout_centerHorizontal="true"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -81,5 +61,43 @@
         android:layout_below="@+id/passenger_header"
         android:text="@string/null_string"
         android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/token_field"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textView2"
+        android:layout_alignLeft="@+id/uid_field"
+        android:text="@string/null_string"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/uid_field"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/token_field"
+        android:layout_alignRight="@+id/bill_passenger"
+        android:layout_marginBottom="41dp"
+        android:text="@string/null_string"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/uid_field"
+        android:layout_alignBottom="@+id/uid_field"
+        android:layout_alignLeft="@+id/fare_value"
+        android:text="UID"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textView2"
+        android:layout_alignLeft="@+id/textView1"
+        android:text="Token"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>
