@@ -1,31 +1,30 @@
 package com.example.tripidnfc;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.content.Intent;
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
+import android.util.Log;
 import android.view.View.OnClickListener;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.nfc.*;
 
-public class MainActivity extends Activity implements android.view.View.OnClickListener {
+public class MainActivity extends Activity implements OnClickListener {
 
-	private static final String TAG = "Tripid";
-	
-	private static final String userId = "tripid101@gmail.com";
-	private static final String passwd = "tripid";
-	private static final String accountType = "com.tripid";
-	private static final String appId = "991e9208868e25be68303c262aae27f88352df16091548f573c5bc8e17708d4d";
-	private static final String secret = "6333e5637bee9bd0e915f9cd5d5fc81f6082d2c4b0a3c1c36d183a7cba5bbdbe";
-	
-	private String accessToken;
-	private String refreshToken;
+	private static final String TAG = "TRIPID Main";
 	
 	private AuthPreferences mPreferences;
+	private AccountManager accountManager;
+	
+	private APItasks mAPItasks;
 	
 	private Boolean loggedIn = false;
 	
@@ -45,12 +44,19 @@ public class MainActivity extends Activity implements android.view.View.OnClickL
 		tokenValue = (TextView) findViewById(R.id.token_field);
 		uidValue = (TextView) findViewById(R.id.uid_field);
 		
+		billButton.setOnClickListener(this);
+		
+		mAPItasks = new APItasks(this);
+		
 		mPreferences = new AuthPreferences(this);
 		if(mPreferences.getUser() != null && mPreferences.getToken() != null) {
-			doAuthentication();
+			mAPItasks.execute(TripidConstants.VALIDATE_TOKEN);
 		}
 		else {
-			addAccount();
+			Account userAccount = new Account(TripidConstants.userId, TripidConstants.accountType);
+			
+			mPreferences.setUser(userAccount.name);
+			mAPItasks.execute(TripidConstants.GET_TOKEN);
 		}
 	}
 
@@ -70,20 +76,18 @@ public class MainActivity extends Activity implements android.view.View.OnClickL
 	
 	@Override
 	public void onClick(View v) {
-		if(v.getId() == R.id.bill_passenger) {
-			if(mBalance != null) {
-				
-			}
+		switch(v.getId()) {
+		case R.id.bill_passenger: new APItasks(this).execute(TripidConstants.CONFIRM_PASSENGER, mName, mToken);
+		break;
 		}
 	}
 	
-	void addAccount() {
-		Account userAccount = null;
+	void confirmPassenger() {
+		Log.d(TAG, "confirm(Passneger()");
 		
-	}
+		if(mToken != null && mName != null) {
 	
-	void doAuthentication() {
-		
+		}
 	}
 	
 	void processIntent(Intent intent) {
@@ -92,6 +96,9 @@ public class MainActivity extends Activity implements android.view.View.OnClickL
 		Parcelable[] rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
 		NdefMessage msg = (NdefMessage) rawMsgs[0];
 		payload = new String(msg.getRecords()[0].getPayload());
+		
+		Log.d(TAG, "nfc payload = " + payload);
+		
 		mUid = payload.split("-")[1].split(",")[0];
 		mToken = payload.split("-")[1].split(",")[1];
 		mName = payload.split("-")[1].split(",")[2];
