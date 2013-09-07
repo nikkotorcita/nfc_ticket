@@ -82,14 +82,6 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 	}
 	
-	void confirmPassenger() {
-		Log.d(TAG, "confirm(Passneger()");
-		
-		if(mToken != null && mName != null) {
-	
-		}
-	}
-	
 	void processIntent(Intent intent) {
 		String payload;
 		

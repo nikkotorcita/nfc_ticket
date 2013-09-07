@@ -10,7 +10,8 @@ public class TripidConstants {
 	public static final String BASE_URL = "http://staging.tripid.com.ph";
 	public static final String OAUTH_URL = BASE_URL + "/oauth/token";
 	public static final String TOKEN_URL = BASE_URL + "/api/user?access_token=";
-	public static final String TRIPS_URL = BASE_URL + "/api/user/trips?access_token=";
+//	public static final String TRIPS_URL = BASE_URL + "/api/user/trips?sort=departure&access_token=";
+	public static final String TRIPS_URL = BASE_URL + "/api/user/trips?type=upcoming&access_token=";
 	public static final String TICKETS_URL = BASE_URL + "/api/trips/";
 	public static final String HEADER = "Content-Type: application/json";
 	

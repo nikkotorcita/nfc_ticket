@@ -25,11 +25,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
-public class APItasks extends AsyncTask<String, Void, Void> {
+public class APItasks extends AsyncTask<String, String, Void> {
 
 	private static final String TAG = "TRIPID APItasks";
 	
@@ -38,11 +44,14 @@ public class APItasks extends AsyncTask<String, Void, Void> {
 	String token, refreshToken;
 	String cmd, arg1, arg2;
 	String nfcToken, nfcName;
+	String postExecMessage;
+	Context mParent;
 	
 	int tripID;  
 	
 	public APItasks(Context context) {
 		mPreferences = new AuthPreferences(context);
+		mParent = context;
 	}
 	
 	@Override
@@ -145,10 +154,10 @@ public class APItasks extends AsyncTask<String, Void, Void> {
 		}
 		else if(cmd == TripidConstants.CONFIRM_PASSENGER) {
 			String tripID;
-			String ticket;
 			
 			tripID = getTripID();
-			confirmTicket(tripID, arg1, arg2);
+			if(tripID != null)
+				confirmTicket(tripID, arg1, arg2);
 		}
 		return null;
 	}
@@ -161,6 +170,18 @@ public class APItasks extends AsyncTask<String, Void, Void> {
 		if(cmd == TripidConstants.GET_TOKEN) {
 			Log.d(TAG, "access token = " + mPreferences.getToken());
 			Log.d(TAG, "refresh token = " + mPreferences.getRefreshToken());
+		}
+		else if(cmd == TripidConstants.CONFIRM_PASSENGER) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(mParent);
+			builder.setMessage(postExecMessage)
+			       .setCancelable(false)
+			       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			           public void onClick(DialogInterface dialog, int id) {
+			                //do things
+			           }
+			       });
+			AlertDialog alert = builder.create();
+			alert.show();
 		}
 	}
 	
@@ -256,6 +277,11 @@ public class APItasks extends AsyncTask<String, Void, Void> {
 			Log.d(TAG, "error status code = " + statusCode);
 		}
 		
+		if(tripID == null) {
+			Log.d(TAG, "no upcoming trips present");
+			postExecMessage = "No upcoming trips present";
+		}
+		
 		return tripID;
 	}
 	
@@ -268,8 +294,9 @@ public class APItasks extends AsyncTask<String, Void, Void> {
 		int statusCode = 0;
 		int confirmStatusCode = 0;
 		String passengerName = null;
-		String passengerId = null;
+		String ticketStatus = null;
 		String ticketId = null;
+		String ticketType = null;
 		
 		Log.d(TAG, "url = " + url);
 		
@@ -291,15 +318,18 @@ public class APItasks extends AsyncTask<String, Void, Void> {
 			
 				for(int i = 0; i < ticketArray.length(); i++) {
 					JSONObject ticketObj = ticketArray.getJSONObject(i);
+					JSONObject userObj = ticketObj.getJSONObject("user");
 					JSONArray passengerArray = ticketObj.getJSONObject("trip").getJSONArray("passengers");
-					ticketId = ticketObj.getString("id");
 					
-					for(int j = 0; j < passengerArray.length(); j++) {
-						JSONObject passenger = passengerArray.getJSONObject(j);
-						passengerName = passenger.getString("first_name") + " " + passenger.getString("last_name");
-						Log.d(TAG, "Found passenger : " + passengerName + ", ticket id = " + ticketId);
-						
-						if(passengerName.equals(nfcName)) {
+					ticketId = ticketObj.getString("id");
+					passengerName = userObj.getString("first_name") + " " + userObj.getString("last_name");
+					ticketStatus = ticketObj.getString("status");
+					ticketType = ticketObj.getString("type");
+					
+					Log.d(TAG, "NAME = " + passengerName + ", ticketId = " + ticketId + ", status = " + ticketStatus + ", type = " + ticketType);
+					
+					if(passengerName.equals(nfcName ) && ticketType.equals("PassengerTicket")) {
+						if(ticketStatus.equals("approved")) {
 							Log.d(TAG, "Passenger matched with tagged NFC information.. confirming passenger ticket.");
 							String confirmUrl = TripidConstants.TICKETS_URL + tripID + "/tickets/" + ticketId + "/confirm?access_token=" + mPreferences.getToken();
 							
@@ -316,17 +346,21 @@ public class APItasks extends AsyncTask<String, Void, Void> {
 							
 							if(confirmStatusCode == 204) {
 								Log.d(TAG, "Passenger " + passengerName + " has been confirmed on this trip.");
+								postExecMessage = "Passenger " + passengerName + " has been confirmed on this trip.";
 								return true;
 							}
 							
 							else {
 								Log.d(TAG, "Failed to confirm passenger " + passengerName);
+								postExecMessage = "Failed to confirm passenger " + passengerName;
 								return false;
 							}
 						}
+						else if(ticketStatus.equals("confirmed")) {
+							Log.d(TAG, "passenger " + passengerName + " is already confirmed!");
+							postExecMessage = "passenger " + passengerName + " is already confirmed!";
+						}
 					}
-					
-					Log.d(TAG, "number of passengers = " + passengerArray.length());
 				}
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
